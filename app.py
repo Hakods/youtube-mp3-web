@@ -13,6 +13,8 @@ from yt_dlp.utils import DownloadError
 
 app = FastAPI(title="YouTube MP3 Downloader API")
 
+COOKIE_FILE = Path(os.getenv("YOUTUBE_COOKIE_FILE", "/etc/secrets/youtube-cookies.txt"))
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -50,6 +52,13 @@ def cleanup_directory(path: str) -> None:
     shutil.rmtree(path, ignore_errors=True)
 
 
+def cookie_file_ready() -> bool:
+    try:
+        return COOKIE_FILE.is_file() and COOKIE_FILE.stat().st_size > 0
+    except OSError:
+        return False
+
+
 def download_audio(url: str, target_dir: Path, playlist: bool) -> Path:
     output_template = (
         str(target_dir / "%(playlist_index)03d - %(title)s.%(ext)s")
@@ -83,6 +92,9 @@ def download_audio(url: str, target_dir: Path, playlist: bool) -> Path:
         "no_warnings": True,
     }
 
+    if cookie_file_ready():
+        options["cookiefile"] = str(COOKIE_FILE)
+
     with YoutubeDL(options) as ydl:
         ydl.download([url])
 
@@ -104,8 +116,8 @@ def root() -> dict[str, str]:
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def health() -> dict[str, object]:
+    return {"status": "ok", "cookies_configured": cookie_file_ready()}
 
 
 @app.post("/download")
@@ -132,7 +144,7 @@ def download(url: str = Form(...), password: str = Form(default="")):
         if "Sign in to confirm" in message or "not a bot" in message.lower():
             message = (
                 "YouTube anti-bot doğrulaması bu isteği engelledi. "
-                "PO Token sağlayıcısı kullanılıyor ancak YouTube yine de isteği reddedebilir."
+                "PO Token ve oturum cookie dosyası kullanılsa da YouTube isteği reddedebilir."
             )
         raise HTTPException(status_code=502, detail=message) from exc
     except Exception as exc:
