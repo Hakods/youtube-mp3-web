@@ -59,7 +59,7 @@ def cookie_file_ready() -> bool:
         return False
 
 
-def download_audio(url: str, target_dir: Path, playlist: bool) -> Path:
+def download_audio(url: str, target_dir: Path, playlist: bool, cookie_file: Path | None = None) -> Path:
     output_template = (
         str(target_dir / "%(playlist_index)03d - %(title)s.%(ext)s")
         if playlist
@@ -92,8 +92,8 @@ def download_audio(url: str, target_dir: Path, playlist: bool) -> Path:
         "no_warnings": True,
     }
 
-    if cookie_file_ready():
-        options["cookiefile"] = str(COOKIE_FILE)
+    if cookie_file is not None:
+        options["cookiefile"] = str(cookie_file)
 
     with YoutubeDL(options) as ydl:
         ydl.download([url])
@@ -136,8 +136,13 @@ def download(url: str = Form(...), password: str = Form(default="")):
     target_dir.mkdir(parents=True, exist_ok=True)
     playlist = looks_like_playlist(url)
 
+    writable_cookie_file = None
+    if cookie_file_ready():
+        writable_cookie_file = Path(job_dir) / "youtube-cookies.txt"
+        shutil.copy2(COOKIE_FILE, writable_cookie_file)
+
     try:
-        result_path = download_audio(url, target_dir, playlist)
+        result_path = download_audio(url, target_dir, playlist, writable_cookie_file)
     except DownloadError as exc:
         cleanup_directory(job_dir)
         message = str(exc)
