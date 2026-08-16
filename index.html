@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YouTube MP3 Downloader</title>
+  <meta name="description" content="Tek video veya oynatma listesindeki sesleri MP3 olarak indir.">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="card">
+      <div class="badge">MP3 · 192 kbps</div>
+      <h1>YouTube MP3 Downloader</h1>
+      <p class="lead">Tek video veya oynatma listesi bağlantısını yapıştır. Tek video MP3, oynatma listesi ZIP olarak hazırlanır.</p>
+
+      <form id="download-form">
+        <label for="url">YouTube bağlantısı</label>
+        <input
+          id="url"
+          name="url"
+          type="url"
+          inputmode="url"
+          autocomplete="off"
+          placeholder="https://www.youtube.com/watch?v=..."
+          required
+        >
+
+        <details>
+          <summary>Erişim anahtarı</summary>
+          <p class="hint">Sunucuda APP_PASSWORD ayarlandıysa buraya gir.</p>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="İsteğe bağlı">
+        </details>
+
+        <button id="submit-button" type="submit">MP3 İndir</button>
+        <p id="status" class="status" aria-live="polite"></p>
+      </form>
+
+      <div class="info-grid">
+        <div>
+          <strong>Tek video</strong>
+          <span>Doğrudan .mp3</span>
+        </div>
+        <div>
+          <strong>Playlist</strong>
+          <span>Tüm MP3'ler .zip içinde</span>
+        </div>
+      </div>
+
+      <p class="legal">Yalnızca indirme hakkına veya iznine sahip olduğun içerikler için kullan.</p>
+    </section>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>
