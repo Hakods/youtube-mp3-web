@@ -67,6 +67,11 @@ def download_audio(url: str, target_dir: Path, playlist: bool) -> Path:
         "retries": 5,
         "fragment_retries": 5,
         "socket_timeout": 30,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["mweb"],
+            }
+        },
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -126,8 +131,8 @@ def download(url: str = Form(...), password: str = Form(default="")):
         message = str(exc)
         if "Sign in to confirm" in message or "not a bot" in message.lower():
             message = (
-                "YouTube bu sunucudan gelen isteği anti-bot doğrulamasına taktı. "
-                "Bir süre sonra tekrar dene."
+                "YouTube anti-bot doğrulaması bu isteği engelledi. "
+                "PO Token sağlayıcısı kullanılıyor ancak YouTube yine de isteği reddedebilir."
             )
         raise HTTPException(status_code=502, detail=message) from exc
     except Exception as exc:
